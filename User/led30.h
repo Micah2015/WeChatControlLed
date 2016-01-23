@@ -2,6 +2,7 @@
 #define	__LED_H
 
 #include "stm32f10x.h"
+#include "global.h"
 //#include "string.h"
 
 void Code_0(void);
@@ -19,4 +20,5 @@ void Led_Breath(uint8_t color, uint8_t BreathWaveCount);	//呼吸灯
 void Led_Write_All(uint8_t red, uint8_t green, uint8_t blue);
 void delay_1s(uint8_t t);	//不准
 void delay_5ms_t(uint8_t t);	//约5ms
+void shutDownAll(void);	//确保关闭所有灯
 #endif

@@ -46,7 +46,7 @@ int main(void)
 			Syntime = 0;
 			MyUsartPrintf(&SendBack,1);	//发送			
 		}
-		if(usart1ReceiveFlag == 1)	//串口接收到数据
+		if(usart1ReceiveFlag == 1)	//串口接收到数据 或16ms
 		{
 			WriteSP=0;
 			usart1ReceiveFlag = 0; //清零
@@ -54,71 +54,72 @@ int main(void)
 			
 			switch(ReceiveBuffer[0])
 			{
-				case '0':
+				case '0':	//暂停
 				{
 					pBreathStatus->enable = 0;
 					SendBack = '0';
-					//pBreathStatus->color = 3;
+				}break;
+				case '9':	//继续
+				{
+					pBreathStatus->enable = 1;
+					SendBack = '9';
 				}break;
 				case '1':
 				{
+					pBreathStatus->count = 0;
 					pBreathStatus->enable = 1;
 					pBreathStatus->color = 1;
 					SendBack = '1';
 				}break;
 				case '2':
 				{
+					pBreathStatus->count = 0;
 					pBreathStatus->enable = 1;
 					pBreathStatus->color = 2;
 					SendBack = '2';
 				}break;
 				case '3':
 				{
+					pBreathStatus->count = 0;
 					pBreathStatus->enable = 1;
 					pBreathStatus->color = 3;
 					SendBack = '3';
 				}break;
 				case '4':
 				{
+					pBreathStatus->count = 0;
 					pBreathStatus->enable = 1;
 					pBreathStatus->color = 4;
 					SendBack = '4';
 				}break;
 				case '5':
 				{
+					pBreathStatus->count = 0;
 					pBreathStatus->enable = 1;
 					pBreathStatus->color = 5;
 					SendBack = '5';
 				}break;
 				case '6':
 				{
+					pBreathStatus->count = 0;
 					pBreathStatus->enable = 1;
 					pBreathStatus->color = 6;
 					SendBack = '6';
 				}break;
-				
 				case '7':	//关灯
 				{
+					delay_5ms_t(30);
 					pBreathStatus->color = 0;
 					pBreathStatus->count = 0;
-					delay_1s(1);
-					pBreathStatus->enable = 0;
-					Led_Write_All(0,0,0);
+					pBreathStatus->enable = 1;
+					//delay_5ms_t(30);
+					//shutDownAll();	//确保关闭所有灯
 					SendBack = '7';
 				}break;
 				
-				default:
-				{
-//					pBreathStatus->color = 0;
-//					delay_1s(1);
-//					pBreathStatus->enable = 1;
-//					pBreathStatus->count = 0;
-					SendBack = 0xff;	//error
-				}
+				default: SendBack = 0xff;	//error
 			}
 			
-			//SendBack = 'Y';
-//			SendBack = ReceiveBuffer[0];
 			MyUsartPrintf(&SendBack,1);	//发送
 		}
   }

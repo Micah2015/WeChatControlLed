@@ -1,12 +1,20 @@
 #include "led30.h"
 
-uint8_t BreathWave100[200] = {		//100点呼吸灯查询表
+//uint8_t BreathWave100[200] = {		//100点呼吸灯查询表
+//0  , 0  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1 ,  1  , 1 ,  2 ,  2 ,  2 ,  2  , 2,
+//2  , 2  , 3  , 3  , 3  , 3  , 3  , 4  , 4  , 4  , 4 ,  5  , 5 ,  5 ,  6 ,  6 ,  6  , 7,
+//7  , 7  , 8  , 8  , 9  , 9  ,10  ,11  ,11  ,12  ,13 , 13  ,14 , 15 , 16 , 17 , 18  ,19,
+//20 , 21 , 23 , 24 , 25 , 27 , 28 , 30 , 32 , 34 , 36,  38 , 40,  42,  45,  47,  50 , 53,
+//56 , 59 , 63 , 66 , 70 , 74 , 78 , 83 , 88 , 93 , 98, 104 ,110, 116, 123, 130, 138 ,146,
+//154, 163, 172, 182, 193, 204, 216, 228, 242, 255};
+
+uint8_t BreathWave100[breathLedNumber*2] = {		//95点呼吸灯查询表
 0  , 0  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1  , 1 ,  1  , 1 ,  2 ,  2 ,  2 ,  2  , 2,
 2  , 2  , 3  , 3  , 3  , 3  , 3  , 4  , 4  , 4  , 4 ,  5  , 5 ,  5 ,  6 ,  6 ,  6  , 7,
 7  , 7  , 8  , 8  , 9  , 9  ,10  ,11  ,11  ,12  ,13 , 13  ,14 , 15 , 16 , 17 , 18  ,19,
 20 , 21 , 23 , 24 , 25 , 27 , 28 , 30 , 32 , 34 , 36,  38 , 40,  42,  45,  47,  50 , 53,
 56 , 59 , 63 , 66 , 70 , 74 , 78 , 83 , 88 , 93 , 98, 104 ,110, 116, 123, 130, 138 ,146,
-154, 163, 172, 182, 193, 204, 216, 228, 242, 255};
+};
 
 void GPIO_Init_led30(void)	//led30的GPIO使能
 {		
@@ -20,11 +28,10 @@ void GPIO_Init_led30(void)	//led30的GPIO使能
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
 	GPIO_Init(GPIOB, &GPIO_InitStructure);	
 	
-	Led_Write_All(0,0,0);	//初始化
-	Led_Write_All(0,0,0);	//初始化
-	for(i=100;i<200;i++)
+	shutDownAll();	//确保关闭所有灯
+	for(i=breathLedNumber;i<breathLedNumber*2;i++)
 	{
-		BreathWave100[i]=BreathWave100[199-i];	//补全后100个点 倒序
+		BreathWave100[i]=BreathWave100[breathLedNumber*2-1-i];	//补全后面的点 倒序
 	}
 }
 
@@ -103,6 +110,7 @@ void Led30_Stop(void) //停止向后传输数据
 {
 	GPIOB->BRR = GPIO_Pin_1;
 	delay_50us();
+	delay_50us();
 }
 
 void ChangeOut(uint8_t* buf)	//将外面的一圈 每次移动一位
@@ -172,6 +180,16 @@ void Led_Write_All(uint8_t red, uint8_t green, uint8_t blue)
 		Led_Write_Single(red,green,blue);
 	}
 	Led30_Stop();
+}
+
+void shutDownAll(void)	//确保关闭所有灯
+{
+	Led30_Stop();
+	delay_5ms_t(1);
+	Led_Write_All(0,0,0);
+	delay_5ms_t(30);
+	Led_Write_All(0,0,0);
+	delay_5ms_t(50);
 }
 
 //void Led_Breath(uint8_t* buf_R,uint8_t* buf_G,uint8_t* buf_B)	//呼吸灯

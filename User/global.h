@@ -5,6 +5,7 @@
 #include "string.h"
 
 #define BufferLength				1024
+#define breathLedNumber			90			//呼吸灯点数
 
 typedef struct
 {
@@ -12,6 +13,7 @@ typedef struct
 	uint8_t color;			//表示呼吸灯颜色
 	uint8_t waitTime;		//表示呼吸灯两个亮度之间的时间间隔
 	uint8_t enable;			//是否允许呼吸灯
+	uint8_t breath_1ms;	//1ms 加1
 }Led_Breath_Status;
 
 #endif

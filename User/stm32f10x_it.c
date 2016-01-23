@@ -8,7 +8,7 @@ uint16_t WriteSP=0;	//串口写指针
 
 uint8_t usart1ReceiveFlag = 0; //串口接收到数据
 
-Led_Breath_Status LBS={0,0,15,0};
+Led_Breath_Status LBS={0,0,20,0}; //默认呼吸灯间隔20ms
 Led_Breath_Status *pBreathStatus=&LBS;
 
 void USART1_IRQHandler(void)	//中断串口接受程序
@@ -28,6 +28,7 @@ void TIM3_IRQHandler(void)	//定时器3 每1ms进入一次中断
 		TIM_ClearITPendingBit(TIM3,TIM_IT_Update); //清除标志位
 		usart1FreeTime++;	//串口1空闲时间
 		tim3++;		//1ms 加1
+		pBreathStatus->breath_1ms++;	//1ms 加1
 		Syntime++;	//同步时间 到60s发当前亮灯状态给上位机
 		
 		Led_Breath_Int(pBreathStatus->enable,pBreathStatus->color,pBreathStatus->waitTime);	//呼吸灯 控制颜色和间隔时间（ms）
@@ -38,11 +39,11 @@ void Led_Breath_Int(uint8_t enable, uint8_t color, uint8_t BreathTime)	//呼吸灯 
 {
 	if(enable)
 	{
-		if(tim3 % BreathTime == 0)
+		if(pBreathStatus->breath_1ms % BreathTime == 0)
 		{
 			Led_Breath(color,pBreathStatus->count);
 			pBreathStatus->count++;
-			if(pBreathStatus->count==200)
+			if(pBreathStatus->count==breathLedNumber*2)
 				pBreathStatus->count=0;
 		}
 	}
