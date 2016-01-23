@@ -14,7 +14,7 @@ const	uint8_t HUSTDTV[]="AT+CWJAP=\"HUSTDTV\",\"13807182202\"\x0d\x0a";
 //const uint8_t linkServer[]="AT+CIPSTART=\"UDP\",\"192.168.2.242\",8080\x0d\x0a";
 //const uint8_t linkServer[]="AT+CIPSTART=\"TCP\",\"192.168.2.5\",8080\x0d\x0a";
 //const uint8_t linkServer[]="AT+CIPSTART=\"TCP\",\"192.168.1.117\",8080\x0d\x0a";
-const uint8_t linkServer[]="AT+CIPSTART=\"TCP\",\"121.201.29.67\",6969\x0d\x0a";
+const uint8_t linkServer[]="AT+CIPSTART=\"TCP\",\"121.42.182.224\",6969\x0d\x0a";
 const uint8_t CIPSEND[]="AT+CIPSEND\x0d\x0a";
 
 uint16_t testTime[15];
@@ -56,8 +56,7 @@ void USART1_Init(void)
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;	  //响应优先级最高
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
-	
+	NVIC_Init(&NVIC_InitStructure);	
 }
 
 //自定义串口发送程序

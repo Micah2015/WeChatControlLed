@@ -2,6 +2,7 @@
 
 uint16_t tim3=0;	//1ms 加1
 uint16_t usart1FreeTime=0;	//串口1空闲时间
+uint16_t Syntime=0;	//同步时间 到60s发当前亮灯状态给上位机 如果中间有发数据则清零
 uint8_t ReceiveBuffer[BufferLength];	//串口缓存
 uint16_t WriteSP=0;	//串口写指针
 
@@ -27,6 +28,7 @@ void TIM3_IRQHandler(void)	//定时器3 每1ms进入一次中断
 		TIM_ClearITPendingBit(TIM3,TIM_IT_Update); //清除标志位
 		usart1FreeTime++;	//串口1空闲时间
 		tim3++;		//1ms 加1
+		Syntime++;	//同步时间 到60s发当前亮灯状态给上位机
 		
 		Led_Breath_Int(pBreathStatus->enable,pBreathStatus->color,pBreathStatus->waitTime);	//呼吸灯 控制颜色和间隔时间（ms）
 	}

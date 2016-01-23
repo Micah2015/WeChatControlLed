@@ -10,7 +10,7 @@ uint8_t BreathWave100[200] = {		//100点呼吸灯查询表
 
 void GPIO_Init_led30(void)	//led30的GPIO使能
 {		
-//	uint8_t i;
+	uint8_t i;
 	
 	GPIO_InitTypeDef GPIO_InitStructure;
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE); 		
@@ -20,11 +20,12 @@ void GPIO_Init_led30(void)	//led30的GPIO使能
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
 	GPIO_Init(GPIOB, &GPIO_InitStructure);	
 	
-	//Led_Write_All(0,0,0);	//初始化
-//	for(i=100;i<200;i++)
-//	{
-//		BreathWave100[i]=BreathWave100[199-i];	//补全后100个点 倒序
-//	}
+	Led_Write_All(0,0,0);	//初始化
+	Led_Write_All(0,0,0);	//初始化
+	for(i=100;i<200;i++)
+	{
+		BreathWave100[i]=BreathWave100[199-i];	//补全后100个点 倒序
+	}
 }
 
 void Code_0(void)
@@ -223,32 +224,32 @@ void Led_Breath(uint8_t color, uint8_t BreathWaveCount)	//呼吸灯
 			Led_Write_All(0,0,0);
 		}break;
 			
-		case 1:
+		case 1:	//白灯
 		{
 			Led_Write_All(BreathWave100[BreathWaveCount],BreathWave100[BreathWaveCount],BreathWave100[BreathWaveCount]);
 		}break;
 		
-		case 2:
+		case 2:	//红灯
 		{
 			Led_Write_All(BreathWave100[BreathWaveCount],0,0);
 		}break;
 		
-		case 3:
+		case 3:	//绿灯
 		{
 			Led_Write_All(0,BreathWave100[BreathWaveCount],0);
 		}break;
 		
-		case 4:
+		case 4:	//蓝灯
 		{
 			Led_Write_All(0,0,BreathWave100[BreathWaveCount]);
 		}break;
 		
-		case 5:
+		case 5:	//黃灯
 		{
 			Led_Write_All(BreathWave100[BreathWaveCount],BreathWave100[BreathWaveCount],0);
 		}break;
 		
-		case 6:
+		case 6:	//青灯
 		{
 			Led_Write_All(0,BreathWave100[BreathWaveCount],BreathWave100[BreathWaveCount]);
 		}break;

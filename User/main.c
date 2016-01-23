@@ -8,6 +8,7 @@ extern Led_Breath_Status *pBreathStatus;
 extern uint16_t tim3;
 extern uint16_t WriteSP;	//串口写指针
 extern uint8_t usart1ReceiveFlag; //串口接收到数据
+extern uint16_t Syntime;	//同步时间 到60s发当前亮灯状态给上位机
 
 void test2(void);
 
@@ -18,60 +19,108 @@ uint8_t buf_B[30]={0,0,0,0,0,0,50,50,50,0,0,0,50,50,50,50,50,50,50,0,0,50,50,0,5
 void Periph_Init(void)	//外设函数初始化
 {
 	GPIO_Init_led30();
-	//TIM3_Config();
-	//USART1_Init();
-	//Wifi_Configure();
+	TIM3_Config();
+	USART1_Init();
+	Wifi_Configure();
 }
 
 	
 int main(void)
 {
-	Periph_Init();
-
-//	Led_Code(0);Led_Code(0);Led_Code(0);Led_Code(0);Led_Code(1);Led_Code(1);Led_Code(1);Led_Code(1);
-//	Led_Code(0);Led_Code(0);Led_Code(0);Led_Code(0);Led_Code(0);Led_Code(0);Led_Code(0);Led_Code(0);
-//	Led_Code(0);Led_Code(0);Led_Code(0);Led_Code(0);Led_Code(0);Led_Code(0);Led_Code(0);Led_Code(0);
-		
-//	GPIOB->BRR = GPIO_Pin_1;
-//	delay_50us();
-//	Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();
-//	Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();
-//	Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();
-//	Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();
-//	Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();
-//	Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();
-//	Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();
-//	Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();
-//	Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();
-//	Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();
-//	Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();
-//	Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();
-//	GPIOB->BRR = GPIO_Pin_1;
-//	delay_50us();
-//	
-//	Code_1();Code_1();Code_1();Code_1();Code_1();Code_1();Code_1();Code_1();	
-//	Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();
-//	Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();
-//	
-//	Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();	
-//	Code_1();Code_1();Code_1();Code_1();Code_1();Code_1();Code_1();Code_1();
-//	Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();
-//	
-//	Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();
-//	Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();Code_0();
-//	Code_1();Code_1();Code_1();Code_1();Code_1();Code_1();Code_1();Code_1();
-
-//	GPIOB->BRR = GPIO_Pin_1;
-//	delay_5ms_t(1);
+	uint8_t SendBack;	//发给服务器
 	
-	Led30_Stop();
-	Led_Write_All(0,0,0);
-	delay_5ms_t(1);
-	Led_Write_All(255,255,255);
+	Periph_Init();
+	
+	/******一开始连上为绿色呼吸灯******/
+	SendBack = 3;
+	MyUsartPrintf(&SendBack,1);
+	delay_5ms_t(2);
+	ReceiveBuffer[0]='3';
+	usart1ReceiveFlag = 1;
+	/******一开始连上为绿色呼吸灯******/
 	
   while (1)
   {
-		//Led_Rotate(buf_R,buf_G,buf_B,7);
+		if(Syntime == 60000)	//到了同步时间
+		{
+			Syntime = 0;
+			MyUsartPrintf(&SendBack,1);	//发送			
+		}
+		if(usart1ReceiveFlag == 1)	//串口接收到数据
+		{
+			WriteSP=0;
+			usart1ReceiveFlag = 0; //清零
+			Syntime = 0;
+			
+			switch(ReceiveBuffer[0])
+			{
+				case '0':
+				{
+					pBreathStatus->enable = 0;
+					SendBack = '0';
+					//pBreathStatus->color = 3;
+				}break;
+				case '1':
+				{
+					pBreathStatus->enable = 1;
+					pBreathStatus->color = 1;
+					SendBack = '1';
+				}break;
+				case '2':
+				{
+					pBreathStatus->enable = 1;
+					pBreathStatus->color = 2;
+					SendBack = '2';
+				}break;
+				case '3':
+				{
+					pBreathStatus->enable = 1;
+					pBreathStatus->color = 3;
+					SendBack = '3';
+				}break;
+				case '4':
+				{
+					pBreathStatus->enable = 1;
+					pBreathStatus->color = 4;
+					SendBack = '4';
+				}break;
+				case '5':
+				{
+					pBreathStatus->enable = 1;
+					pBreathStatus->color = 5;
+					SendBack = '5';
+				}break;
+				case '6':
+				{
+					pBreathStatus->enable = 1;
+					pBreathStatus->color = 6;
+					SendBack = '6';
+				}break;
+				
+				case '7':	//关灯
+				{
+					pBreathStatus->color = 0;
+					pBreathStatus->count = 0;
+					delay_1s(1);
+					pBreathStatus->enable = 0;
+					Led_Write_All(0,0,0);
+					SendBack = '7';
+				}break;
+				
+				default:
+				{
+//					pBreathStatus->color = 0;
+//					delay_1s(1);
+//					pBreathStatus->enable = 1;
+//					pBreathStatus->count = 0;
+					SendBack = 0xff;	//error
+				}
+			}
+			
+			//SendBack = 'Y';
+//			SendBack = ReceiveBuffer[0];
+			MyUsartPrintf(&SendBack,1);	//发送
+		}
   }
 }
 
