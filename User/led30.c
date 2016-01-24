@@ -167,7 +167,7 @@ void Led_Rotate(uint8_t* buf_R,uint8_t* buf_G,uint8_t* buf_B,uint8_t T_5ms)	//外
 	}
 	Led30_Stop();
 	delay_5ms_t(T_5ms);
-	Buf_Rotate_InOut(buf_R);
+	Buf_Rotate_InOut(buf_R);	//将不同颜色的buf移动1格
 	Buf_Rotate_InOut(buf_G);
 	Buf_Rotate_InOut(buf_B);
 }

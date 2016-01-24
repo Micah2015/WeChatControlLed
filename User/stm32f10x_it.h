@@ -13,7 +13,7 @@
 
 	 
 void Led_Breath_Int(uint8_t enable, uint8_t color, uint8_t BreathTime);	//呼吸灯 是否允许 控制颜色和间隔时间（ms）
-
+void Led_Rotate_Int(uint8_t enable, uint8_t changeTime, uint8_t mode);	//changeTime:转动的间隔时间 mode:选择旋转灯的模式
 
 
 #ifdef __cplusplus
