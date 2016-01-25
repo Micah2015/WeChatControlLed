@@ -17,10 +17,10 @@ uint16_t WriteSP=0;	//串口写指针
 
 uint8_t usart1ReceiveFlag = 0; //串口接收到数据
 
-Led_Breath_Status LBS={0,0,20,0,0}; //默认呼吸灯间隔20ms
+Led_Breath_Status LBS={0,0,20,0,0,0}; //默认呼吸灯间隔20ms
 Led_Breath_Status* pBreathStatus=&LBS;	//呼吸灯结构体指针
 
-Led_Rotate_Status LRS={0,7,0,1};	//默认旋转灯间隔10*5ms mode:1
+Led_Rotate_Status LRS={0,50,0,1,0};	//默认旋转灯间隔50ms mode:1
 Led_Rotate_Status* pLed_Rotate_Status=&LRS;	//旋转灯结构体指针
 
 void USART1_IRQHandler(void)	//中断串口接受程序
@@ -67,17 +67,17 @@ void Led_Rotate_Int(uint8_t enable, uint8_t changeTime, uint8_t mode)	//changeTi
 {
 	if(enable)	//允许旋转灯
 	{
-		if(pLed_Rotate_Status->rotate_1ms % changeTime)	//到了指定时间旋转一次
+		if(pLed_Rotate_Status->rotate_1ms % changeTime == 0)	//到了指定时间旋转一次
 		{
 			switch(mode)
 			{
 				case 1:
 				{
-					Led_Rotate(buf_R1,buf_G1,buf_B1,changeTime);
+					Led_Rotate(buf_R1,buf_G1,buf_B1);
 				}break;
 				case 2:
 				{
-					Led_Rotate(buf_R2,buf_G2,buf_B2,changeTime);
+					Led_Rotate(buf_R2,buf_G2,buf_B2);
 				}break;
 				
 				default: ;

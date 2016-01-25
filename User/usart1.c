@@ -171,7 +171,7 @@ uint8_t Test_CIPSEND_Mode(void)	//测试是否已经进入透传模式
 		return 0;
 }
 
-void Wifi_Configure(void)	//配置成 单连接透传模式 TCP
+void Wifi_Configure(uint8_t enRST)	//配置成 单连接透传模式 TCP
 {
 	uint8_t SendBuffer[100];
 	uint8_t cipstatus=0;
@@ -180,10 +180,14 @@ void Wifi_Configure(void)	//配置成 单连接透传模式 TCP
 	
 	testTime[0]=tim3;
 	delay_5ms_t(2);	//等待串口中断开启
-	GPIOB->BRR = GPIO_Pin_0;	//复位Wifi模电
-	delay_5ms_t(1);
-	GPIOB->BSRR = GPIO_Pin_0;
-	delay_1s(5);
+	GPIOB->BSRR = GPIO_Pin_0;	//RST高电平 
+	if(enRST)	//是否进行复位
+	{
+		GPIOB->BRR = GPIO_Pin_0;	//复位Wifi模电
+		delay_5ms_t(1);
+		GPIOB->BSRR = GPIO_Pin_0;
+		delay_1s(5);
+	}
 	testTime[1]=tim3;
 	WriteSP = 0;
 	i=0;

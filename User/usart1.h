@@ -15,7 +15,7 @@ uint8_t Find_Start_OK(void);	//检测AT是否已经启动
 uint8_t SingleLink_OK(void);	//检测是否设置成单连接 AT+CIPMUX=0
 uint8_t CIPMODE1_OK(void);	//检测是否设置成透传模式
 uint8_t CIPSTATUS_OK3(void);	//显示网络状态stat 2:获得IP 3.已连接 4:断开连接 5.未连接到Wifi
-void Wifi_Configure(void);	//配置成 单连接透传模式 TCP
+void Wifi_Configure(uint8_t enRST);	//配置成 单连接透传模式 TCP
 uint8_t Test_CIPSEND_Mode(void);	//测试是否已经进入透传模式
 
 #endif /* __USART1_H */

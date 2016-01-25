@@ -154,7 +154,7 @@ void Buf_Rotate_InOut(uint8_t* buf)	//按照内圈、外圈移动一位
 	buf[30] = temp;
 }
 
-void Led_Rotate(uint8_t* buf_R,uint8_t* buf_G,uint8_t* buf_B,uint8_t T_5ms)	//外顺时针转，内逆时针转 移动一次延时
+void Led_Rotate(uint8_t* buf_R,uint8_t* buf_G,uint8_t* buf_B)	//外顺时针转，内逆时针转 移动一次延时
 {
 	uint8_t i;
 	for(i=0;i<18;i++)
@@ -166,7 +166,7 @@ void Led_Rotate(uint8_t* buf_R,uint8_t* buf_G,uint8_t* buf_B,uint8_t T_5ms)	//外
 		Led_Write_Single(buf_R[i],buf_G[i],buf_B[i]);
 	}
 	Led30_Stop();
-	delay_5ms_t(T_5ms);
+	//delay_5ms_t(T_5ms);
 	Buf_Rotate_InOut(buf_R);	//将不同颜色的buf移动1格
 	Buf_Rotate_InOut(buf_G);
 	Buf_Rotate_InOut(buf_B);
@@ -189,7 +189,7 @@ void shutDownAll(void)	//确保关闭所有灯
 	Led_Write_All(0,0,0);
 	delay_5ms_t(30);
 	Led_Write_All(0,0,0);
-	delay_5ms_t(50);
+	delay_5ms_t(30);
 }
 
 //void Led_Breath(uint8_t* buf_R,uint8_t* buf_G,uint8_t* buf_B)	//呼吸灯

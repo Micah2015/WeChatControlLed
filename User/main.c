@@ -13,138 +13,206 @@ extern uint8_t usart1ReceiveFlag; //串口接收到数据
 extern uint16_t Syntime;	//同步时间 到60s发当前亮灯状态给上位机
 
 void test2(void);
-
-//uint8_t buf_R1[30]={50,50,50,0,0,0,0,0,0,50,50,50,50,50,50,0,0,0,50,0,0,50,50,0,50,50,15,50};	//mode 1
-//uint8_t buf_G1[30]={0,0,0,50,50,50,0,0,0,50,50,50,0,0,0,50,50,50,50,0,0,50,50,0,50,50,15,50};
-//uint8_t buf_B1[30]={0,0,0,0,0,0,50,50,50,0,0,0,50,50,50,50,50,50,50,0,0,50,50,0,50,50,15,50};
 	
 void Periph_Init(void)	//外设函数初始化
 {
 	GPIO_Init_led30();
 	TIM3_Config();
 	USART1_Init();
-	Wifi_Configure();
+	Wifi_Configure(1);
 }
-
 	
 int main(void)
 {
-	uint8_t SendBack;	//发给服务器
+	uint8_t SendBack='3';	//发给服务器
+	uint8_t testConnect='S';
+//	uint8_t TrueWifiSerialFlag=0;
+//	uint8_t i;
+	uint8_t WifiRestart = 0;
 	
 	Periph_Init();
 	
+//	for(i=0;i<1024;i++)
+//		ReceiveBuffer[i] = 0;
+//	WriteSP = 0;
+//	MyUsartPrintf(&SendBack,1);
+//	delay_5ms_t(100);
+//	while(1);
+	
 	/******一开始连上为绿色呼吸灯******/
-	SendBack = 3;
+	SendBack = '3';
 	MyUsartPrintf(&SendBack,1);
 	delay_5ms_t(2);
-	ReceiveBuffer[0]='3';
+	ReceiveBuffer[0]=SendBack;
 	usart1ReceiveFlag = 1;
+	ReceiveBuffer[10]=0;
+	ReceiveBuffer[11]=0;
 	/******一开始连上为绿色呼吸灯******/
 	
   while (1)
   {
-		if(Syntime == 60000)	//到了同步时间
+		if(WifiRestart == 1)	//Wifi模式掉电重启
 		{
-			Syntime = 0;
-			MyUsartPrintf(&SendBack,1);	//发送			
+			WifiRestart = 0;
+			Wifi_Configure(1);	
+			usart1ReceiveFlag = 0; //进入这里说明Wifi连接断开了 接收到的Flag肯定不是来自服务器 清零
+			delay_5ms_t(1);	//至少收到10 11，防止被串口出来的数据覆盖
+			ReceiveBuffer[10]=0;	//清零 防止后面认为Wifi断电了
+			ReceiveBuffer[11]=0;
 		}
-		if(usart1ReceiveFlag == 1)	//串口接收到数据 或16ms
+		
+		if(Syntime >= 29999) //30s 同步一次
 		{
-			WriteSP=0;
-			usart1ReceiveFlag = 0; //清零
 			Syntime = 0;
-			
-			switch(ReceiveBuffer[0])
+			WriteSP = 1;
+			MyUsartPrintf(&testConnect,1); //发送的数不能超出9个 否则影响后面第10个判断
+			delay_5ms_t(20);
+			WriteSP = 0;	//下次接收恢复到0，否则接收到的是第二个，下面的判断会错
+		}
+		
+		delay_5ms_t(4);
+		if(ReceiveBuffer[10] == 0 && ReceiveBuffer[11] == 0)	//后面有数是Wifi断电了
+		{
+			if(usart1ReceiveFlag == 1)	//串口接收到数据  
 			{
-				case '0':	//暂停 呼吸灯
-				{
-					pBreathStatus->enable = 0;	//关闭呼吸灯
-					SendBack = '0';
-				}break;
-				case '9':	//继续 呼吸灯
-				{
-					pBreathStatus->enable = 1;
-					SendBack = '9';
-				}break;
-				case '1':	//白 呼吸灯
-				{
-					pLed_Rotate_Status->enable = 0;	//关闭旋转灯
-					pBreathStatus->count = 0;
-					pBreathStatus->enable = 1;
-					pBreathStatus->color = 1;
-					SendBack = '1';
-				}break;
-				case '2':	//红 呼吸灯
-				{
-					pLed_Rotate_Status->enable = 0;	//关闭旋转灯
-					pBreathStatus->count = 0;
-					pBreathStatus->enable = 1;
-					pBreathStatus->color = 2;
-					SendBack = '2';
-				}break;
-				case '3':	//绿 呼吸灯
-				{
-					pLed_Rotate_Status->enable = 0;	//关闭旋转灯
-					pBreathStatus->count = 0;
-					pBreathStatus->enable = 1;
-					pBreathStatus->color = 3;
-					SendBack = '3';
-				}break;
-				case '4':	//蓝 呼吸灯
-				{
-					pLed_Rotate_Status->enable = 0;	//关闭旋转灯
-					pBreathStatus->count = 0;
-					pBreathStatus->enable = 1;
-					pBreathStatus->color = 4;
-					SendBack = '4';
-				}break;
-				case '5':	//黃 呼吸灯
-				{
-					pLed_Rotate_Status->enable = 0;	//关闭旋转灯
-					pBreathStatus->count = 0;
-					pBreathStatus->enable = 1;
-					pBreathStatus->color = 5;
-					SendBack = '5';
-				}break;
-				case '6':	//青 呼吸灯
-				{
-					pLed_Rotate_Status->enable = 0;	//关闭旋转灯
-					pBreathStatus->count = 0;
-					pBreathStatus->enable = 1;
-					pBreathStatus->color = 6;
-					SendBack = '6';
-				}break;
-				case '7':	//关灯 呼吸灯
-				{
-					delay_5ms_t(30);
-					pBreathStatus->color = 0;
-					pBreathStatus->count = 0;
-					pBreathStatus->enable = 1;
-					//delay_5ms_t(30);
-					//shutDownAll();	//确保关闭所有灯
-					SendBack = '7';
-				}break;
-				case 'a':	//旋转灯
-				{
-					pBreathStatus->enable = 0;	//关闭呼吸灯
-					pLed_Rotate_Status->enable = 1;
-					pLed_Rotate_Status->changeTime = 7;
-					pLed_Rotate_Status->mode = 1;
-					SendBack = 'a';
-				}break;
-				case 'b':	//旋转灯
-				{
-					pBreathStatus->enable = 0;	//关闭呼吸灯
-					pLed_Rotate_Status->enable = 1;
-					pLed_Rotate_Status->changeTime = 3;
-					pLed_Rotate_Status->mode = 2;
-					SendBack = 'b';
-				}break;
+				WriteSP=0;
+				usart1ReceiveFlag = 0; //清零
 				
-				default: SendBack = 0xff;	//error
+				switch(ReceiveBuffer[0])
+				{
+					case '0':	//暂停 呼吸灯
+					{
+						if(pBreathStatus->enable == 1)	//呼吸灯
+						{
+							pBreathStatus->enable = 0;	//关闭呼吸灯
+							SendBack = '0';
+							pBreathStatus->stopFlag = 1;
+						}
+						if(pLed_Rotate_Status->enable == 1)
+						{
+							pLed_Rotate_Status->enable = 0;
+							SendBack = '0';
+							pLed_Rotate_Status->stopFlag = 1;
+						}
+					}break;
+					case '9':	//继续 
+					{
+						if(pBreathStatus->stopFlag == 1)	//当前为呼吸灯暂停
+						{
+							pBreathStatus->stopFlag = 0;
+							pBreathStatus->enable = 1;
+							SendBack = '9';
+						}
+						if(pLed_Rotate_Status->stopFlag == 1)	//当前为旋转灯暂停
+						{
+							pLed_Rotate_Status->stopFlag = 0;
+							pLed_Rotate_Status->enable = 1;
+							SendBack = '9';
+						}
+					}break;
+					case '1':	//白 呼吸灯
+					{
+						pLed_Rotate_Status->enable = 0;	//关闭旋转灯
+						pBreathStatus->stopFlag = 0;	//进入这里 取消暂停状态
+						pLed_Rotate_Status->stopFlag = 0;
+						pBreathStatus->count = 0;
+						pBreathStatus->enable = 1;
+						pBreathStatus->color = 1;
+						SendBack = '1';
+					}break;
+					case '2':	//红 呼吸灯
+					{
+						pLed_Rotate_Status->enable = 0;	//关闭旋转灯
+						pBreathStatus->stopFlag = 0;	//进入这里 取消暂停状态
+						pLed_Rotate_Status->stopFlag = 0;
+						pBreathStatus->count = 0;
+						pBreathStatus->enable = 1;
+						pBreathStatus->color = 2;
+						SendBack = '2';
+					}break;
+					case '3':	//绿 呼吸灯
+					{
+						pLed_Rotate_Status->enable = 0;	//关闭旋转灯
+						pBreathStatus->stopFlag = 0;	//进入这里 取消暂停状态
+						pLed_Rotate_Status->stopFlag = 0;
+						pBreathStatus->count = 0;
+						pBreathStatus->enable = 1;
+						pBreathStatus->color = 3;
+						SendBack = '3';
+					}break;
+					case '4':	//蓝 呼吸灯
+					{
+						pLed_Rotate_Status->enable = 0;	//关闭旋转灯
+						pBreathStatus->stopFlag = 0;	//进入这里 取消暂停状态
+						pLed_Rotate_Status->stopFlag = 0;
+						pBreathStatus->count = 0;
+						pBreathStatus->enable = 1;
+						pBreathStatus->color = 4;
+						SendBack = '4';
+					}break;
+					case '5':	//黃 呼吸灯
+					{
+						pLed_Rotate_Status->enable = 0;	//关闭旋转灯
+						pBreathStatus->stopFlag = 0;	//进入这里 取消暂停状态
+						pLed_Rotate_Status->stopFlag = 0;
+						pBreathStatus->count = 0;
+						pBreathStatus->enable = 1;
+						pBreathStatus->color = 5;
+						SendBack = '5';
+					}break;
+					case '6':	//青 呼吸灯
+					{
+						pLed_Rotate_Status->enable = 0;	//关闭旋转灯
+						pBreathStatus->stopFlag = 0;	//进入这里 取消暂停状态
+						pLed_Rotate_Status->stopFlag = 0;
+						pBreathStatus->count = 0;
+						pBreathStatus->enable = 1;
+						pBreathStatus->color = 6;
+						SendBack = '6';
+					}break;
+					case '7':	//关灯
+					{
+						pLed_Rotate_Status->enable = 0;	//关闭旋转灯
+						pBreathStatus->stopFlag = 0;	//进入这里 取消暂停状态
+						pLed_Rotate_Status->stopFlag = 0;
+						
+						delay_5ms_t(30);
+						pBreathStatus->color = 0;
+						pBreathStatus->count = 0;
+						pBreathStatus->enable = 1;
+						
+						SendBack = '7';
+					}break;
+					case 'a':	//旋转灯
+					{
+						pBreathStatus->enable = 0;	//关闭呼吸灯
+						pBreathStatus->stopFlag = 0;	//进入这里 取消暂停状态
+						pLed_Rotate_Status->stopFlag = 0;
+						pLed_Rotate_Status->enable = 1;
+						pLed_Rotate_Status->changeTime = 50;
+						pLed_Rotate_Status->mode = 1;
+						SendBack = 'a';
+					}break;
+					case 'b':	//旋转灯
+					{
+						pBreathStatus->enable = 0;	//关闭呼吸灯
+						pBreathStatus->stopFlag = 0;	//进入这里 取消暂停状态
+						pLed_Rotate_Status->stopFlag = 0;
+						pLed_Rotate_Status->enable = 1;
+						pLed_Rotate_Status->changeTime = 50;
+						pLed_Rotate_Status->mode = 2;
+						SendBack = 'b';
+					}break;
+					
+					default: SendBack = 0xff;	//error
+				}
+				MyUsartPrintf(&SendBack,1);	//发送
 			}
-			
-			MyUsartPrintf(&SendBack,1);	//发送
+		}
+		else	//Wifi 断电重启了
+		{
+			WifiRestart = 1;
+			ReceiveBuffer[10] = 0; //清零
 		}
   }
 }
